@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import di.dilogin.BukkitApplication;
 import di.dilogin.controller.LangManager;
 import di.dilogin.entity.CodeGenerator;
 import di.dilogin.entity.DIUser;
@@ -61,7 +62,7 @@ public class UserLoginEventAuthmeImpl implements UserLoginEvent {
 			initPlayerAuthmeRegisterRequest(event, playerName);
 		}
 
-		Bukkit.getScheduler().runTask(api.getInternalController().getPlugin(),
+		Bukkit.getScheduler().runTask(BukkitApplication.getPlugin(),
 				() -> Bukkit.getPluginManager().callEvent(new DILoginEvent(event.getPlayer())));
 	}
 

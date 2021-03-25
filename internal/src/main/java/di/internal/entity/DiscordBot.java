@@ -1,10 +1,9 @@
 package di.internal.entity;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
-
-import org.bukkit.plugin.Plugin;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -50,10 +49,10 @@ public class DiscordBot {
 	 * @param token    Bot token.
 	 * @param plugin   Bukkit plugin.
 	 */
-	public DiscordBot(String prefix, long serverid, String token, Plugin plugin) {
+	public DiscordBot(String prefix, long serverid, String token, Logger logger) {
 		this.prefix = prefix;
 		this.serverid = serverid;
-		initBot(token, plugin);
+		initBot(token, logger);
 	}
 
 	/**
@@ -62,20 +61,20 @@ public class DiscordBot {
 	 * @param token  Bot token.
 	 * @param plugin Bukkit plugin.
 	 */
-	public void initBot(String token, Plugin plugin) {
+	public void initBot(String token, Logger logger) {
 		try {
 			this.api = JDABuilder.createDefault(token)
 					.enableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.DIRECT_MESSAGES).build();
 			api.awaitReady();
-			onConnectToDiscord(plugin);
-			checkPermissions(plugin);
+			onConnectToDiscord(logger);
+			checkPermissions(logger);
 		} catch (LoginException e) {
-			plugin.getLogger().warning("The Bot failed to start. You have not entered a valid token.");
-			plugin.getPluginLoader().disablePlugin(plugin);
+			logger.warning("The Bot failed to start. You have not entered a valid token.");
+			System.exit(-1);
 		} catch (InterruptedException e) {
-			plugin.getLogger().warning("The Bot failed to start. Reason:");
+			logger.warning("The Bot failed to start. Reason:");
 			e.printStackTrace();
-			plugin.getPluginLoader().disablePlugin(plugin);
+			System.exit(-1);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -85,8 +84,8 @@ public class DiscordBot {
 	 * 
 	 * @param plugin Bukkit plugin.
 	 */
-	private void onConnectToDiscord(Plugin plugin) {
-		plugin.getLogger().info("Bot started");
+	private void onConnectToDiscord(Logger logger) {
+		logger.info("Bot started");
 		this.commandHandler = new CommandHandler(prefix);
 		api.addEventListener(this.commandHandler);
 	}
@@ -96,11 +95,11 @@ public class DiscordBot {
 	 * 
 	 * @param api JDA Api.
 	 */
-	private void checkPermissions(Plugin plugin) {
+	private void checkPermissions(Logger logger) {
 		Optional<Guild> guildOpt = Optional.ofNullable(api.getGuildById(serverid));
 
 		if (!guildOpt.isPresent()) {
-			plugin.getLogger().warning("I could not find the server with ID " + serverid);
+			logger.warning("I could not find the server with ID " + serverid);
 			return;
 		}
 
@@ -111,12 +110,12 @@ public class DiscordBot {
 			return;
 
 		if (!bot.hasPermission(Permission.MESSAGE_WRITE))
-			plugin.getLogger().warning("The bot does not have writes permission on the server, this could cause a conflict!");
+			logger.warning("The bot does not have writes permission on the server, this could cause a conflict!");
 		
 		if (!bot.hasPermission(Permission.MESSAGE_MANAGE))
-			plugin.getLogger().warning("The bot is not allowed to handle messages on the server, this could lead to conflict!");
+			logger.warning("The bot is not allowed to handle messages on the server, this could lead to conflict!");
 		
 		if (!bot.hasPermission(Permission.MESSAGE_ADD_REACTION))
-			plugin.getLogger().warning("The bot does not have permission to add reactions on the server, this could cause conflict!");
+			logger.warning("The bot does not have permission to add reactions on the server, this could cause conflict!");
 	}
 }

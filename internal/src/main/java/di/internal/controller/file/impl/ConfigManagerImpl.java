@@ -1,0 +1,59 @@
+package di.internal.controller.file.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
+
+import di.internal.controller.file.ConfigManager;
+import di.internal.controller.file.FileController;
+
+/**
+ * Configuration file driver.
+ */
+public class ConfigManagerImpl implements ConfigManager {
+
+	private static final String FILENAME = "config.yml";
+
+	private File customConfigFile;
+
+	private Map<String, Object> yamlData;
+
+	@SuppressWarnings("unchecked")
+	public ConfigManagerImpl(FileController controller, File dataFolder) {
+		this.customConfigFile = new File(dataFolder, FILENAME);
+		if (!this.customConfigFile.exists()) {
+			this.customConfigFile.getParentFile().mkdirs();
+			controller.saveResource(dataFolder, FILENAME, false);
+		}
+		Yaml yaml = new Yaml();
+		try {
+			this.yamlData = (Map<String, Object>) yaml.load(new FileInputStream(this.customConfigFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public String getString(String path) {
+		char specialChar = (char) 167;
+		return this.yamlData.get(path).toString().replace('&', specialChar);
+	}
+	
+	@Override
+	public long getLong(String path) {
+		return Long.parseLong(this.yamlData.get(path).toString());
+	}
+	
+	@Override
+	public boolean getBoolean(String path) {
+		return Boolean.parseBoolean(this.yamlData.get(path).toString());
+	}
+	
+	@Override
+	public int getInt(String path) {
+		return Integer.parseInt(this.yamlData.get(path).toString());
+	}
+}

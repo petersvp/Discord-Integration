@@ -38,7 +38,7 @@ public class DIUserDaoSqliteImpl implements DIUserDao {
 			try (ResultSet rs = ps.executeQuery()) {
 				long id = rs.getLong(1);
 				Optional<User> userOpt = Utils.getDiscordUserById(api.getCoreController().getDiscordApi(), id);
-				Optional<Player> playerOpt = Utils.getUserPlayerByName(api.getInternalController().getPlugin(),
+				Optional<Player> playerOpt = Utils.getUserPlayerByName(BukkitApplication.getPlugin(),
 						playerName);
 
 				if (!playerOpt.isPresent()) {

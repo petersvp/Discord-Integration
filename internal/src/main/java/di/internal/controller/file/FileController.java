@@ -5,19 +5,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.logging.Level;
-
-import org.bukkit.plugin.Plugin;
+import java.util.logging.Logger;
 
 public interface FileController {
 
-	public default void saveResource(Plugin plugin, File folder, String resourcePath, boolean replace) {
+	InputStream getResource(String filename);
+	
+	Logger getLogger();
+	
+	default void saveResource(File folder, String resourcePath, boolean replace) {
 		if (resourcePath == null || resourcePath.equals(""))
 			throw new IllegalArgumentException("ResourcePath cannot be null or empty");
 		resourcePath = resourcePath.replace('\\', '/');
-		InputStream in = getResource(plugin, resourcePath);
+		InputStream in = getResource(resourcePath);
 		File outFile = new File(folder, resourcePath);
 		int lastIndex = resourcePath.lastIndexOf('/');
 		File outDir = new File(folder, resourcePath.substring(0, (lastIndex >= 0) ? lastIndex : 0));
@@ -33,27 +34,12 @@ public interface FileController {
 				out.close();
 				in.close();
 			} else {
-				plugin.getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile
+				getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile
 						+ " because " + outFile.getName() + " already exists.");
 			}
 		} catch (IOException ex) {
-			plugin.getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, ex);
-		}
-
-	}
-
-	public default InputStream getResource(Plugin plugin, String filename) {
-		if (filename == null)
-			throw new IllegalArgumentException("Filename cannot be null");
-		try {
-			URL url = plugin.getClass().getClassLoader().getResource(filename);
-			if (url == null)
-				return null;
-			URLConnection connection = url.openConnection();
-			connection.setUseCaches(false);
-			return connection.getInputStream();
-		} catch (IOException ex) {
-			return null;
+			getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, ex);
 		}
 	}
+
 }

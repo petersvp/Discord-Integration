@@ -75,7 +75,7 @@ public class UserTeleportEvents implements Listener {
 		Float pitch = Float.parseFloat(confManager.getString("teleport_pitch"));
 
 		Optional<World> world = Optional
-				.ofNullable(api.getInternalController().getPlugin().getServer().getWorld(worldName));
+				.ofNullable(BukkitApplication.getPlugin().getServer().getWorld(worldName));
 
 		if (!world.isPresent())
 			throw new IllegalArgumentException("No world named " + worldName);

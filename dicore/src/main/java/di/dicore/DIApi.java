@@ -4,6 +4,7 @@ import org.bukkit.plugin.Plugin;
 
 import di.internal.controller.CoreController;
 import di.internal.controller.InternalController;
+import di.internal.controller.impl.InternalControllerSpigotImpl;
 import di.internal.entity.DiscordCommand;
 import di.internal.exception.NoApiException;
 import lombok.Getter;
@@ -39,7 +40,7 @@ public class DIApi {
 			throw new NoApiException(plugin);
 		}
 		this.coreController = BukkitApplication.getInternalController();
-		this.internalController = new InternalController(plugin, coreController, classLoader);
+		this.internalController = new InternalControllerSpigotImpl(plugin, coreController, classLoader);
 	}
 
 	/**
