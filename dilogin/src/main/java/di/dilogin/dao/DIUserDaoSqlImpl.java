@@ -107,6 +107,22 @@ public class DIUserDaoSqlImpl implements DIUserDao {
 		}
 		return false;
 	}
+	
+	@Override
+	public String getUserForId(long id) {
+		String query = "select * from user where discord_id = ?;";
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.setLong(1, id);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return rs.getString("username");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return "N/A";
+	}
+	
 
 	@Override
 	public int getDiscordUserAccounts(User user) {

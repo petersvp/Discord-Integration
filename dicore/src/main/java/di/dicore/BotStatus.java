@@ -11,24 +11,28 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import di.internal.controller.CoreController;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Activity.ActivityType;
 
 public class BotStatus implements Listener {
 
 	private static final CoreController controller = BukkitApplication.getInternalController();
 	private static int type;
 	private static String content;
+	private static ActivityType activity;
 
 	// Init bot presence system
 	public static void init() {
 		if (!controller.getConfigManager().contains("status_type")
 				|| !controller.getConfigManager().contains("status_content"))
+		{
 			return;
+		}
 
 		type = controller.getConfigManager().getInt("status_type");
 		content = controller.getConfigManager().getString("status_content");
+		activity = ActivityType.values()[controller.getConfigManager().getInt("status_activity")];
 
 		initEvents();
-
 	}
 	
 	// Init events from type
@@ -63,7 +67,7 @@ public class BotStatus implements Listener {
 	
 	// Change presence
 	private static void fire() {
-		controller.getBot().getApi().getPresence().setActivity(Activity.playing(getContent()));
+		controller.getBot().getApi().getPresence().setActivity(Activity.of(activity, getContent()));
 	}
 	
 	// Change content

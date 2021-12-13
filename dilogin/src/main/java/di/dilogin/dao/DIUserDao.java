@@ -48,6 +48,8 @@ public interface DIUserDao {
 	 * @return True if player exists.
 	 */
 	boolean containsDiscordId(long id);
+	
+	String getUserForId(long id);
 
 	/**
 	 * @param user Discord User

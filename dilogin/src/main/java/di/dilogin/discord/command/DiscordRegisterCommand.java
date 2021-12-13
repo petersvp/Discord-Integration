@@ -41,25 +41,33 @@ public class DiscordRegisterCommand implements DiscordCommand {
 	@Override
 	public void execute(String message, MessageReceivedEvent event) {
 
-		event.getMessage().delete().delay(Duration.ofSeconds(20)).queue();
+		event.getChannel().sendMessage("`public void execute: message = " +message.toString() + "`").queue();
+		
+		//event.getMessage().delete().delay(Duration.ofSeconds(20)).queue();
 		if (userDao.containsDiscordId(event.getAuthor().getIdLong())) {
-			event.getChannel().sendMessage(LangManager.getString("register_already_exists"))
-					.delay(Duration.ofSeconds(20)).flatMap(Message::delete).queue();
+			event.getChannel().sendMessage(LangManager.getString("register_already_exists").replace("%existing_name%", userDao.getUserForId(event.getAuthor().getIdLong())))
+					//.delay(Duration.ofSeconds(20))
+					//.flatMap(Message::delete)
+					.queue();
 			return;
 		}
 
 		// Check account limits.
 		if (userDao.getDiscordUserAccounts(event.getAuthor()) >= api.getInternalController().getConfigManager()
 				.getInt("register_max_discord_accounts")) {
-			event.getChannel().sendMessage(LangManager.getString("register_max_accounts")).delay(Duration.ofSeconds(20))
-					.flatMap(Message::delete).queue();
+			event.getChannel().sendMessage(LangManager.getString("register_max_accounts"))
+					//.delay(Duration.ofSeconds(20))
+					//.flatMap(Message::delete)
+					.queue();
 			return;
 		}
 
 		// Check arguments.
 		if (message.equals("") || message.isEmpty()) {
-			event.getChannel().sendMessage(LangManager.getString("register_discord_arguments"))
-					.delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
+			event.getChannel().sendMessage(LangManager.getString("register_discord_arguments") + "`Debug: message = " +message.toString() + "`")
+					//.delay(Duration.ofSeconds(10))
+					//.flatMap(Message::delete)
+					.queue();
 			return;
 		}
 
@@ -67,7 +75,9 @@ public class DiscordRegisterCommand implements DiscordCommand {
 		Optional<TmpMessage> tmpMessageOpt = TmpCache.getRegisterMessageByCode(message);
 		if (!tmpMessageOpt.isPresent()) {
 			event.getChannel().sendMessage(LangManager.getString("register_code_not_found"))
-					.delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
+					//.delay(Duration.ofSeconds(10))
+					//.flatMap(Message::delete)
+					.queue();
 			return;
 		}
 
@@ -76,9 +86,14 @@ public class DiscordRegisterCommand implements DiscordCommand {
 		String password = CodeGenerator.getCode(8, api);
 		player.sendMessage(LangManager.getString(event.getAuthor(), player, "register_success")
 				.replace("%authme_password%", password));
+		
 		// Send message to discord.
 		MessageEmbed messageEmbed = getEmbedMessage(player, event.getAuthor());
-		event.getChannel().sendMessage(messageEmbed).delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
+		event.getChannel().sendMessage(messageEmbed)
+			//.delay(Duration.ofSeconds(10))
+			//.flatMap(Message::delete)
+			.queue();
+		
 		// Remove user from register cache.
 		TmpCache.removeRegister(player.getName());
 		// Add user to data base.
@@ -94,7 +109,6 @@ public class DiscordRegisterCommand implements DiscordCommand {
 
 	@Override
 	public String getAlias() {
-		
 		return api.getInternalController().getConfigManager().getString("register_command");
 	}
 
