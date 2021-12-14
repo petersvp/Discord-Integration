@@ -1,5 +1,7 @@
 package di.dilogin.minecraft.event;
 
+import java.util.Optional;
+
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -30,28 +32,73 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 
+import di.dilogin.entity.DIUser;
+import di.dilogin.entity.TmpMessage;
+import di.dilogin.minecraft.cache.TmpCache;
+import di.dicore.DIApi;
+import di.dilogin.BukkitApplication;
+import di.dilogin.controller.LangManager;
+import di.dilogin.minecraft.cache.TmpCache;
 import di.dilogin.minecraft.cache.UserBlockedCache;
+import di.dilogin.minecraft.util.Util;
+import net.dv8tion.jda.api.entities.User;
 
 @SuppressWarnings("deprecation")
 public class UserBlockEvents implements Listener {
 	
+	private final DIApi api = BukkitApplication.getDIApi();
+	
+	private void SendReplyResponse(Player player)
+	{
+		//player.sendMessage(LangManager.getString(player, "login_without_role_required"))
+		BukkitApplication.getDIApi();
+		Optional<TmpMessage> pendingRegistration = TmpCache.getRegisterMessage(player.getName());
+		if (pendingRegistration.isPresent()){
+			String code = pendingRegistration.get().getCode();
+			String regcommand = api.getCoreController().getBot().getPrefix() + api.getInternalController().getConfigManager().getString("register_command") + " " + code;
+			player.sendMessage(LangManager.getString(player, "register_arguments")
+					.replace("%register_command%", regcommand));
+		}
+		else {
+			
+			Optional<DIUser> userOpt = UserLoginEventImpl.userDao.get(player.getName());
+			if(userOpt.isPresent())
+			{
+				if (!Util.isWhiteListed(userOpt.get().getPlayerDiscord())) {
+					player.sendMessage(LangManager.getString(player, "login_without_role_required"));
+					di.dilogin.controller.DILoginController.kickPlayer(player, LangManager.getString(player, "login_without_role_required"));
+				}
+				else
+					player.sendMessage(LangManager.getString(player, "login_request"));
+			}	
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerSendCommand(PlayerCommandPreprocessEvent event) {
-		String mensaje = event.getMessage();
-		if (mensaje.indexOf(" ") == -1) {
-			if (mensaje.equalsIgnoreCase("/register"))
-				return;
-		} else if (mensaje.split(" ")[0].equalsIgnoreCase("/register")) {
-			return;
-		}
+//		String message = event.getMessage();
+//		if (message.indexOf(" ") == -1) {
+//			if (message.equalsIgnoreCase("/register") || message.equalsIgnoreCase("/login"))
+//				return;
+//		} else if (message.split(" ")[0].equalsIgnoreCase("/register") || message.split(" ")[0].equalsIgnoreCase("/login") ) {
+//			return;
+//		}
 		if (UserBlockedCache.contains(event.getPlayer().getName()))
+		{
 			event.setCancelled(true);
+			Player player = event.getPlayer();
+			SendReplyResponse(player);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		if (UserBlockedCache.contains(event.getPlayer().getName()))
+		{
 			event.setCancelled(true);
+			Player player = event.getPlayer();
+			SendReplyResponse(player);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)

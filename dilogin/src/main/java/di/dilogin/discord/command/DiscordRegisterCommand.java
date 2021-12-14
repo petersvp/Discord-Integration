@@ -41,7 +41,7 @@ public class DiscordRegisterCommand implements DiscordCommand {
 	@Override
 	public void execute(String message, MessageReceivedEvent event) {
 
-		event.getChannel().sendMessage("`public void execute: message = " +message.toString() + "`").queue();
+		//event.getChannel().sendMessage("`public void execute: message = " +message.toString() + "`").queue();
 		
 		//event.getMessage().delete().delay(Duration.ofSeconds(20)).queue();
 		if (userDao.containsDiscordId(event.getAuthor().getIdLong())) {
@@ -64,7 +64,7 @@ public class DiscordRegisterCommand implements DiscordCommand {
 
 		// Check arguments.
 		if (message.equals("") || message.isEmpty()) {
-			event.getChannel().sendMessage(LangManager.getString("register_discord_arguments") + "`Debug: message = " +message.toString() + "`")
+			event.getChannel().sendMessage(LangManager.getString("register_discord_arguments"))
 					//.delay(Duration.ofSeconds(10))
 					//.flatMap(Message::delete)
 					.queue();

@@ -84,6 +84,7 @@ public class UserReactionMessageEvent extends ListenerAdapter {
 		} else {
 			if (!Util.isWhiteListed(user)) {
 				player.sendMessage(LangManager.getString(player, "login_without_role_required"));
+				DILoginController.kickPlayer(player, LangManager.getString(player, "login_without_role_required"));
 			} else {
 				DILoginController.loginUser(player, user);
 			}

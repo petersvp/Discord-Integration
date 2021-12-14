@@ -1,9 +1,9 @@
-name: DILogin
+name: CXWAuth
 main: di.dilogin.BukkitApplication
 version: 3.0.6
 author: Alhxe
 api-version: 1.16
-depend: [DICore]
+depend: [CXWCraft]
 softdepend: [AuthMe, Multiverse-Core]
 commands:
     diregister:

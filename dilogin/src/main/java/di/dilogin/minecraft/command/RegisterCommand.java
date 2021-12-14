@@ -48,46 +48,54 @@ public class RegisterCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
+			
+			String code = TmpCache.getRegisterMessage(player.getName()).get().getCode();
+			String regcommand = api.getCoreController().getBot().getPrefix() + api.getInternalController().getConfigManager().getString("register_command") + " " + code;
+			
+			player.sendMessage(LangManager.getString(player, "register_arguments")
+					.replace("%register_command%", regcommand));
+			
+			return true;
 
-			if (userDao.contains(player.getName())) {
-				player.sendMessage(LangManager.getString(player, "register_already_exists"));
-				return false;
-			}
-
-			if (args.length == 0) {
-				player.sendMessage(LangManager.getString(player, "register_arguments"));
-				return false;
-			}
-
-			String id = arrayToString(args);
-			if (!idIsValid(id)) {
-				player.sendMessage(LangManager.getString(player, "register_user_not_detected")
-						.replace("%user_discord_id%", id.replace(" ", "")));
-				return false;
-			}
-
-			Optional<User> userOpt = Utils.getDiscordUserById(api.getCoreController().getDiscordApi(),
-					Long.parseLong(id));
-			if (!userOpt.isPresent()) {
-				player.sendMessage(
-						LangManager.getString(player, "register_user_not_detected").replace("%user_discord_id%", id));
-				return false;
-			}
-
-			User user = userOpt.get();
-
-			if (userDao.getDiscordUserAccounts(user) >= api.getInternalController().getConfigManager()
-					.getInt("register_max_discord_accounts")) {
-				player.sendMessage(LangManager.getString(player, "register_max_accounts").replace("%user_discord_id%",
-						id.replace(" ", "")));
-				return false;
-			}
-
-			player.sendMessage(LangManager.getString(user, player, "register_submit"));
-
-			MessageEmbed messageEmbed = getEmbedMessage(player, user);
-
-			sendMessage(user, player, messageEmbed);
+//			if (userDao.contains(player.getName())) {
+//				player.sendMessage(LangManager.getString(player, "register_already_exists"));
+//				return false;
+//			}
+//
+//			if (args.length == 0) {
+//				player.sendMessage(LangManager.getString(player, "register_arguments"));
+//				return false;
+//			}
+//
+//			String id = arrayToString(args);
+//			if (!idIsValid(id)) {
+//				player.sendMessage(LangManager.getString(player, "register_user_not_detected")
+//						.replace("%register_command%", regcommand));
+//				return false;
+//			}
+//
+//			Optional<User> userOpt = Utils.getDiscordUserById(api.getCoreController().getDiscordApi(),
+//					Long.parseLong(id));
+//			if (!userOpt.isPresent()) {
+//				player.sendMessage(
+//						LangManager.getString(player, "register_user_not_detected").replace("%user_discord_id%", id));
+//				return false;
+//			}
+//
+//			User user = userOpt.get();
+//
+//			if (userDao.getDiscordUserAccounts(user) >= api.getInternalController().getConfigManager()
+//					.getInt("register_max_discord_accounts")) {
+//				player.sendMessage(LangManager.getString(player, "register_max_accounts").replace("%user_discord_id%",
+//						id.replace(" ", "")));
+//				return false;
+//			}
+//
+//			player.sendMessage(LangManager.getString(user, player, "register_submit"));
+//
+//			MessageEmbed messageEmbed = getEmbedMessage(player, user);
+//
+//			sendMessage(user, player, messageEmbed);
 
 		}
 		return true;
@@ -113,8 +121,10 @@ public class RegisterCommand implements CommandExecutor {
 					TextChannel serverchannel = api.getCoreController().getDiscordApi()
 							.getTextChannelById(api.getInternalController().getConfigManager().getLong("channel"));
 
-					serverchannel.sendMessage(user.getAsMention()).delay(Duration.ofSeconds(10))
-							.flatMap(Message::delete).queue();
+					serverchannel.sendMessage(user.getAsMention())
+						//.delay(Duration.ofSeconds(10))
+						//.flatMap(Message::delete)
+						.queue();
 
 					Message servermessage = serverchannel.sendMessage(messageEmbed).submit().join();
 					servermessage.addReaction(emoji).queue();

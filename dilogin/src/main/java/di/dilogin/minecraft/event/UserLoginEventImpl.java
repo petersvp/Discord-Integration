@@ -57,6 +57,7 @@ public class UserLoginEventImpl implements UserLoginEvent {
 
 		if (!Util.isWhiteListed(user.getPlayerDiscord())) {
 			event.getPlayer().sendMessage(LangManager.getString(user, "login_without_role_required"));
+			DILoginController.kickPlayer(event.getPlayer(), LangManager.getString(event.getPlayer(), "login_without_role_required"));
 		} else {
 			event.getPlayer().sendMessage(LangManager.getString(user, "login_request"));
 			sendLoginMessageRequest(user.getPlayerBukkit().get(), user.getPlayerDiscord());

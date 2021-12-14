@@ -45,6 +45,7 @@ public class UnregisterCommand implements CommandExecutor {
 
 		String nick = args[0];
 		Optional<DIUser> optUser = userDao.get(nick);
+		sender.sendMessage(optUser.toString());
 
 		if (!optUser.isPresent()) {
 			sender.sendMessage(LangManager.getString("no_player").replace("%nick%", nick));
