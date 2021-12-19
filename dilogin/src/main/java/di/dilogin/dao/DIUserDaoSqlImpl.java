@@ -66,6 +66,19 @@ public class DIUserDaoSqlImpl implements DIUserDao {
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	public void add(String minecraftUser, long discordId)
+	{
+		String query = "insert or replace into user(username, discord_id) values(?,?)";
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
+			ps.setString(1, minecraftUser);
+			ps.setLong(2, discordId);
+			ps.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void remove(DIUser user) {

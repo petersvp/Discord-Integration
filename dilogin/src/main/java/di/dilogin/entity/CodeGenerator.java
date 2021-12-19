@@ -17,17 +17,17 @@ public class CodeGenerator {
 	/**
 	 * List of valid numbers for the code.
 	 */
-	private static final String NUMBERS = "0123456789";
+	public static final String NUMBERS = "0123456789";
 
 	/**
 	 * List of valid uppercase letters for the code.
 	 */
-	private static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public static final String CAPITAL_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	/**
 	 * List of valid lowercase letters for the code.
 	 */
-	private static final String LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
+	public static final String LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
 
 	/**
 	 * @param length Number of characters for the code.
@@ -47,7 +47,7 @@ public class CodeGenerator {
 	 * @param length Size that the code will have.
 	 * @return Generated code.
 	 */
-	private static String getCode(String key, int length) {
+	public static String getCode(String key, int length) {
 		String code = "";
 		for (int i = 0; i < length; i++) {
 			code += (key.charAt((int) (Math.random() * key.length())));

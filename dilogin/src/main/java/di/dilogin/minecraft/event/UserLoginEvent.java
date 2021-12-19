@@ -13,6 +13,7 @@ import di.dilogin.controller.DILoginController;
 import di.dilogin.controller.LangManager;
 import di.dilogin.dao.DIUserDao;
 import di.dilogin.dao.DIUserDaoSqlImpl;
+import di.dilogin.entity.CodeGenerator;
 import di.dilogin.entity.TmpMessage;
 import di.dilogin.minecraft.cache.TmpCache;
 import net.dv8tion.jda.api.entities.Message;
@@ -71,14 +72,21 @@ public interface UserLoginEvent extends Listener {
 	 * @param user   Discord user.
 	 */
 	default void sendLoginMessageRequest(Player player, User user) {
-		MessageEmbed embed = DILoginController.getEmbedBase()
+		
+		String code = CodeGenerator.getCode(CodeGenerator.NUMBERS, 4);
+
+		MessageEmbed embedDM = DILoginController.getEmbedBase()
 				.setTitle(LangManager.getString(player, "login_discord_title"))
-				.setDescription(LangManager.getString(user, player, "login_discord_desc")).build();
+				.setDescription(LangManager.getString(user, player, "login_discord_desc_dm").replace("%login_code%", code.toString())).build();
+		
+		MessageEmbed embedSV = DILoginController.getEmbedBase()
+				.setTitle(LangManager.getString(player, "login_discord_title"))
+				.setDescription(LangManager.getString(user, player, "login_discord_desc").replace("%login_code%", code.toString())).build();
 
 		user.openPrivateChannel().submit()
-				.thenAccept(channel -> channel.sendMessage(embed).submit().thenAccept(message -> {
-					message.addReaction(EMOJI).queue();
-					TmpCache.addLogin(player.getName(), new TmpMessage(player, user, message, null));
+				.thenAccept(channel -> channel.sendMessage(embedDM).submit().thenAccept(message -> {
+					//message.addReaction(EMOJI).queue();
+					TmpCache.addLogin(player.getName(), new TmpMessage(player, user, message, code));
 				}).whenComplete((message, error) -> {
 					if (error == null)
 						return;
@@ -88,7 +96,7 @@ public interface UserLoginEvent extends Listener {
 
 					serverchannel.sendMessage(user.getAsMention()).delay(Duration.ofSeconds(10))
 							.flatMap(Message::delete).queue();
-					Message servermessage = serverchannel.sendMessage(embed).submit().join();
+					Message servermessage = serverchannel.sendMessage(embedSV).submit().join();
 					servermessage.addReaction(EMOJI).queue();
 					TmpCache.addLogin(player.getName(), new TmpMessage(player, user, servermessage, null));
 				}));

@@ -37,6 +37,7 @@ import di.dilogin.entity.TmpMessage;
 import di.dilogin.minecraft.cache.TmpCache;
 import di.dicore.DIApi;
 import di.dilogin.BukkitApplication;
+import di.dilogin.controller.DILoginController;
 import di.dilogin.controller.LangManager;
 import di.dilogin.minecraft.cache.TmpCache;
 import di.dilogin.minecraft.cache.UserBlockedCache;
@@ -95,6 +96,13 @@ public class UserBlockEvents implements Listener {
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		if (UserBlockedCache.contains(event.getPlayer().getName()))
 		{
+			String enteredCode = event.getMessage();
+			Optional<TmpMessage> pendingLogin = TmpCache.getLoginMessage(event.getPlayer().getName());
+			if(pendingLogin.isPresent() && pendingLogin.get().getCode().equalsIgnoreCase(enteredCode)) {
+				DILoginController.loginUser(event.getPlayer(), pendingLogin.get().getUser());
+				event.setCancelled(true);
+				return;
+			}
 			event.setCancelled(true);
 			Player player = event.getPlayer();
 			SendReplyResponse(player);

@@ -16,6 +16,8 @@ import di.dilogin.entity.CodeGenerator;
 import di.dilogin.entity.DIUser;
 import di.dilogin.entity.TmpMessage;
 import di.dilogin.minecraft.cache.TmpCache;
+import di.dilogin.minecraft.event.UserLoginEventImpl;
+import di.dilogin.minecraft.util.Util;
 import di.internal.entity.DiscordCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -102,7 +104,14 @@ public class DiscordRegisterCommand implements DiscordCommand {
 		if (DILoginController.isAuthmeEnabled()) {
 			AuthmeHook.register(player, password);
 		} else {
-			DILoginController.loginUser(player, event.getAuthor());
+			
+			Optional<DIUser> userOpt = UserLoginEventImpl.userDao.get(player.getName());
+			if(userOpt.isPresent())
+			{
+				if (!Util.isWhiteListed(userOpt.get().getPlayerDiscord())) {
+					di.dilogin.controller.DILoginController.kickPlayer(player, LangManager.getString(player, "login_without_role_required"));
+				} else DILoginController.loginUser(player, event.getAuthor());
+			}
 		}
 
 	}

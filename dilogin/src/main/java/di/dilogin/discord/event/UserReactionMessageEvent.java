@@ -48,7 +48,7 @@ public class UserReactionMessageEvent extends ListenerAdapter {
 		}
 
 		Optional<TmpMessage> loginOpt = TmpCache.getLoginMessage(event.getMessageIdLong());
-		if (loginOpt.isPresent())
+		if (loginOpt.isPresent() && loginOpt.get().getCode() == null)
 			loginUser(event, loginOpt.get());
 	}
 

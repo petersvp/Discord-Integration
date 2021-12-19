@@ -22,6 +22,7 @@ public interface DIUserDao {
 	 * @param user DIUser.
 	 */
 	void add(DIUser user);
+	void add(String minecraftUser, long discordId);
 
 	/**
 	 * Delete a user from the database.

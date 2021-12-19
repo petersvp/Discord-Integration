@@ -11,9 +11,11 @@ import org.bukkit.entity.Player;
 
 import di.dicore.DIApi;
 import di.dilogin.BukkitApplication;
+import di.dilogin.controller.DILoginController;
 import di.dilogin.controller.LangManager;
 import di.dilogin.dao.DIUserDao;
 import di.dilogin.dao.DIUserDaoSqlImpl;
+import di.dilogin.entity.DIUser;
 import di.dilogin.entity.TmpMessage;
 import di.dilogin.minecraft.cache.TmpCache;
 import di.internal.utils.Utils;
@@ -46,57 +48,21 @@ public class RegisterCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			
-			String code = TmpCache.getRegisterMessage(player.getName()).get().getCode();
-			String regcommand = api.getCoreController().getBot().getPrefix() + api.getInternalController().getConfigManager().getString("register_command") + " " + code;
-			
-			player.sendMessage(LangManager.getString(player, "register_arguments")
-					.replace("%register_command%", regcommand));
-			
-			return true;
 
-//			if (userDao.contains(player.getName())) {
-//				player.sendMessage(LangManager.getString(player, "register_already_exists"));
-//				return false;
-//			}
-//
-//			if (args.length == 0) {
-//				player.sendMessage(LangManager.getString(player, "register_arguments"));
-//				return false;
-//			}
-//
-//			String id = arrayToString(args);
-//			if (!idIsValid(id)) {
-//				player.sendMessage(LangManager.getString(player, "register_user_not_detected")
-//						.replace("%register_command%", regcommand));
-//				return false;
-//			}
-//
-//			Optional<User> userOpt = Utils.getDiscordUserById(api.getCoreController().getDiscordApi(),
-//					Long.parseLong(id));
-//			if (!userOpt.isPresent()) {
-//				player.sendMessage(
-//						LangManager.getString(player, "register_user_not_detected").replace("%user_discord_id%", id));
-//				return false;
-//			}
-//
-//			User user = userOpt.get();
-//
-//			if (userDao.getDiscordUserAccounts(user) >= api.getInternalController().getConfigManager()
-//					.getInt("register_max_discord_accounts")) {
-//				player.sendMessage(LangManager.getString(player, "register_max_accounts").replace("%user_discord_id%",
-//						id.replace(" ", "")));
-//				return false;
-//			}
-//
-//			player.sendMessage(LangManager.getString(user, player, "register_submit"));
-//
-//			MessageEmbed messageEmbed = getEmbedMessage(player, user);
-//
-//			sendMessage(user, player, messageEmbed);
-
+		// We modify this to do something very different
+		if(args.length == 2)
+		{
+			try {
+				String minecraftNick = args[0]; 
+				long discordId = Long.parseLong(args[1]);
+				userDao.add(minecraftNick, discordId);
+				Optional<Player> playerOpt = Utils.getUserPlayerByName(api.getInternalController().getPlugin(), minecraftNick);
+				if(playerOpt.isPresent()) 
+					playerOpt.get().kickPlayer(LangManager.getString(playerOpt.get(), "please_login_again"));
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return true;
 	}
